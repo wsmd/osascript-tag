@@ -6,6 +6,11 @@
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": "wsmd/osascript-tag",
+  "homepage": "https://github.com/wsmd/osascript-tag",
+  "bugs": {
+    "url": "https://github.com/wsmd/osascript-tag/issues"
+  },
   "keywords": [
     "apple",
     "applescript",

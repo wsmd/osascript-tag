@@ -25,8 +25,6 @@
 >
 > — Paul Newman
 
-
-
 ## Installation
 
 To get started, add `osascript-tag` to your project:
@@ -34,6 +32,8 @@ To get started, add `osascript-tag` to your project:
 ```
 npm i --save osascript-tag
 ```
+
+**⚠️ Warning:** This package is still in beta and in active development. The API is likely to change in future releases.
 
 ## Usage
 
