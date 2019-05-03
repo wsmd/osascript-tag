@@ -33,7 +33,7 @@ interface JXAOptions extends SharedOptions {
   /**
    * The arguments to pass to the JXA script
    */
-  args?: any[];
+  argv?: any[];
 }
 
 interface TemplateStringFn<T> {
@@ -44,26 +44,26 @@ function isTemplateString(value: any): value is TemplateStringsArray {
   return Array.isArray(value) && Object.prototype.hasOwnProperty.call(value, 'raw');
 }
 
-function buildString(strings: ReadonlyArray<string>, values: ReadonlyArray<any>): string {
+function buildString(strings: ReadonlyArray<string>, replacements: ReadonlyArray<any>): string {
   let result = '';
 
   const totalStrings = strings.length;
   for (let i = 0; i < totalStrings; i++) {
-    const value = i < totalStrings - 1 ? values[i] : '';
+    const value = i < totalStrings - 1 ? replacements[i] : '';
     result += strings[i] + value;
   }
 
   return result.trim();
 }
 
-function runScript<T>(strings: TemplateStringsArray, values: any[], options: Options & JXAOptions): Promise<T> {
+function runScript<T>(strings: TemplateStringsArray, replacements: any[], options: Options & JXAOptions): Promise<T> {
   if (process.platform !== 'darwin') {
     return Promise.reject(new Error('osascript-tag requires MacOS'));
   }
   return new Promise((resolve, reject) => {
-    const args: any[] = options.args || [];
+    const argv: any[] = options.argv || [];
     let flags: ['-s', string] = [] as any;
-    let script = buildString(strings, values);
+    let script = buildString(strings, replacements);
     let language: Language = 'AppleScript';
 
     if (options.language === 'JavaScript') {
@@ -71,7 +71,7 @@ function runScript<T>(strings: TemplateStringsArray, values: any[], options: Opt
       script = `
         (function(...argv){
           ${script}
-        })(${args.map(value => JSON.stringify(value))})
+        })(${argv.map(value => JSON.stringify(value))})
       `;
     }
 
@@ -117,37 +117,36 @@ function runScript<T>(strings: TemplateStringsArray, values: any[], options: Opt
   });
 }
 
-function osascript<T extends any = any>(strings: TemplateStringsArray, ...values: any[]): Promise<T>;
+function osascript<T extends any = any>(script: TemplateStringsArray, ...replacements: any[]): Promise<T>;
 function osascript<T extends any = any>(options: Options): TemplateStringFn<T>;
 function osascript<T>(
-  stringOrOptions: TemplateStringsArray | Options,
-  ...valuesArray: any[]
+  scriptOrOptions: TemplateStringsArray | Options,
+  ...replacementsArray: any[]
 ): TemplateStringFn<T> | Promise<T> {
-  if (isTemplateString(stringOrOptions)) {
-    return runScript<T>(stringOrOptions, valuesArray, {});
+  if (isTemplateString(scriptOrOptions)) {
+    return runScript<T>(scriptOrOptions, replacementsArray, {});
   }
-
-  return (strings: TemplateStringsArray, ...values: any[]) => {
-    return runScript<T>(strings, values, stringOrOptions || {});
+  return (script: TemplateStringsArray, ...replacements: any[]) => {
+    return runScript<T>(script, replacements, scriptOrOptions || {});
   };
 }
 
-function jxa<T extends any = any>(strings: TemplateStringsArray, ...values: any[]): Promise<T>;
-function jxa<T extends any = any>(options: JXAOptions): TemplateStringFn<T>;
-function jxa<T>(
-  stringOrOptions: TemplateStringsArray | JXAOptions,
-  ...valuesArray: any[]
+export function jxa<T extends any = any>(script: TemplateStringsArray, ...replacements: any[]): Promise<T>;
+export function jxa<T extends any = any>(options: JXAOptions): TemplateStringFn<T>;
+export function jxa<T>(
+  scriptOrOptions: TemplateStringsArray | JXAOptions,
+  ...replacementsArray: any[]
 ): TemplateStringFn<T> | Promise<T> {
-  if (isTemplateString(stringOrOptions)) {
-    return runScript<T>(stringOrOptions, valuesArray, {
+  if (isTemplateString(scriptOrOptions)) {
+    return runScript<T>(scriptOrOptions, replacementsArray, {
       language: 'JavaScript',
     });
   }
 
-  return (strings: TemplateStringsArray, ...values: any[]) => {
-    return runScript<T>(strings, values, {
+  return (strings: TemplateStringsArray, ...replacements: any[]) => {
+    return runScript<T>(strings, replacements, {
       language: 'JavaScript',
-      ...stringOrOptions,
+      ...scriptOrOptions,
     });
   };
 }

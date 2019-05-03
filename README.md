@@ -205,7 +205,7 @@ osascript.jxa({ parse: true })`
      - `e` Redirect script errors to stderr (default)
      - `o` Redirect script errors to stdout.
    - `parse?: boolean` - A boolean indicating whether the standard output of the script is parsed for consumption in JavaScript. This uses `JSON.parse` under the hood. **Note that setting this option to true, will automatically set the `flags` option to `"se"`**. Defaults to `false`.
-   - `args?: any[]` - An array of arguments to be passed to the script. This array will be available in the JXA script text as a global variable `argv`. Please note that all values will be serialized to strings.
+   - `argv?: any[]` - An array of arguments to be passed to the script. This array will be available in the JXA script text as a global variable `argv`. Please note that all values will be serialized to strings.
 
 ##### Returns
 
