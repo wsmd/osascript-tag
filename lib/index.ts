@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import * as ChildProcess from 'child_process';
 
 type Language = 'AppleScript' | 'JavaScript';
 
@@ -9,8 +9,10 @@ interface SharedOptions {
    * concatenated in the same string.
    *
    * The meanings of the modifier characters are as follows:
-   *  - (h) Print values in human-readable form (default).
-   *  - (s) Print values in recompilable source form.
+   *  - (h) Return values in human-readable form (default).
+   *  - (s) Return values in recompilable source form.
+   *  - (e) Redirect script errors to stderr (default)
+   *  - (o) Redirect script errors to stdout.
    */
   flags?: string;
 }
@@ -27,7 +29,11 @@ interface JXAOptions extends SharedOptions {
   /**
    * Parse the output result as JSON
    */
-  json?: boolean;
+  parse?: boolean;
+  /**
+   * The arguments to pass to the JXA script
+   */
+  args?: any[];
 }
 
 interface TemplateStringFn<T> {
@@ -47,44 +53,66 @@ function buildString(strings: ReadonlyArray<string>, values: ReadonlyArray<any>)
     result += strings[i] + value;
   }
 
-  return result;
+  return result.trim();
 }
 
-async function runScript<T>(strings: TemplateStringsArray, values: any[], options: Options & JXAOptions): Promise<T> {
-  const script = buildString(strings, values);
+function runScript<T>(strings: TemplateStringsArray, values: any[], options: Options & JXAOptions): Promise<T> {
+  if (process.platform !== 'darwin') {
+    return Promise.reject(new Error('osascript-tag requires MacOS'));
+  }
   return new Promise((resolve, reject) => {
+    const args: any[] = options.args || [];
+    let flags: ['-s', string] = [] as any;
+    let script = buildString(strings, values);
     let language: Language = 'AppleScript';
+
     if (options.language === 'JavaScript') {
       language = options.language;
+      script = `
+        (function(...argv){
+          ${script}
+        })(${args.map(value => JSON.stringify(value))})
+      `;
     }
 
-    const flags: string[] = [];
+    if (options.parse) {
+      flags = ['-s', 's'];
+    }
+
     if (typeof options.flags === 'string') {
-      flags.push('-s', options.flags);
+      flags = ['-s', options.flags];
     }
 
-    const child = spawn('osascript', ['-l', language, ...flags, '-e', script]);
+    const child = ChildProcess.spawn('osascript', ['-l', language, ...flags, '-e', script]);
 
     let errorString = '';
     child.stderr.on('data', error => {
       errorString += error.toString();
     });
 
-    child.stderr.on('close', () => {
-      reject(errorString);
+    let dataString = '';
+    child.stdout.on('data', data => {
+      dataString += data.toString();
     });
 
-    child.stdout.on('data', data => {
-      let output = data.toString().trim();
-      console.log(output);
-      if (options.json) {
-        try {
-          output = JSON.parse(output);
-        } catch (error) {
-          reject(error);
+    child.on('close', () => {
+      if (errorString) {
+        reject(errorString);
+      } else {
+        let result = dataString;
+        if (options.parse) {
+          try {
+            result = JSON.parse(dataString);
+          } catch (error) {
+            reject(error);
+          }
         }
+        resolve(result as any);
       }
-      resolve(output);
+    });
+
+    child.on('error', error => {
+      reject(error);
     });
   });
 }
