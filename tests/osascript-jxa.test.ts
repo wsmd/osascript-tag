@@ -3,6 +3,10 @@ import osascript from '../lib';
 
 jest.mock('child_process');
 
+beforeEach(() => {
+  Object.defineProperty(process, 'platform', { value: 'darwin' });
+});
+
 describe('osascript.jxa', () => {
   it('calls osascript with correct arguments', async () => {
     await osascript.jxa`test`;

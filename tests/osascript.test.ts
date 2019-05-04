@@ -3,12 +3,15 @@ import osascript from '../lib';
 
 jest.mock('child_process');
 
+beforeEach(() => {
+  Object.defineProperty(process, 'platform', { value: 'darwin' });
+});
+
 describe('osascript', () => {
   it('throws when not using macOS', () => {
     const original = process.platform;
     Object.defineProperty(process, 'platform', { value: 'lcars' });
     expect(osascript``).rejects.toThrowError('osascript-tag requires macOS');
-    Object.defineProperty(process, 'platform', { value: original });
   });
 
   it('calls osascript', async () => {
