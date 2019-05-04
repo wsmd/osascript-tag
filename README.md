@@ -113,12 +113,12 @@ The `osascript-tag` can be used in one of the following ways:
 
 ### `osascript`
 
-Executes an AppleScript.
+Executes the given OSA script.
 
 ##### Example
 
 ```js
-osascript`
+const result = await osascript`
   tell application "Finder"
     name of every file of the desktop
   end tell
@@ -136,12 +136,12 @@ A `Promise` that resolves with the script's standard output, or rejects with an 
 
 ### `osascript(options: Options)`
 
-Executes an AppleScript with custom options.
+Executes the given OSA script with custom options.
 
 ##### Example
 
 ```js
-osascript({ flags: 'so' })`
+const result = await osascript({ flags: 'so' })`
   tell application "Finder"
     name of every file of the desktop
   end tell
@@ -164,12 +164,12 @@ An instance of [`osascript`](#osascript) configured with the provided options.
 
 ### `osascript.jxa`
 
-A convenient wrapper for `osascript` pre-configured to run JXA.
+A convenient wrapper for `osascript` configured to run JXA.
 
 ##### Example
 
 ```js
-osascript.jxa`
+await osascript.jxa`
   const app = Application.currentApplication();
   app.includeStandardAdditions = true;
   app.displayAlert('This is a message');
@@ -187,7 +187,7 @@ Executes a JXA script with custom options.
 ##### Example
 
 ```js
-osascript.jxa({ parse: true })`
+const result = await osascript.jxa({ parse: true })`
   const app = Application('iTunes');
   return {
     artist: app.currentTrack.artist(),
@@ -204,8 +204,8 @@ osascript.jxa({ parse: true })`
      - `s` Return values in recompilable source form.
      - `e` Redirect script errors to stderr (default)
      - `o` Redirect script errors to stdout.
-   - `parse?: boolean` - A boolean indicating whether the standard output of the script is parsed for consumption in JavaScript. This uses `JSON.parse` under the hood. **Note that setting this option to true, will automatically set the `flags` option to `"se"`**. Defaults to `false`.
-   - `argv?: any[]` - An array of arguments to be passed to the script. This array will be available in the JXA script text as a global variable `argv`. Please note that all values will be serialized to strings.
+   - `parse?: boolean` - A boolean indicating whether the standard output of the script is parsed for consumption in JavaScript. This uses `JSON.parse` under the hood. **Note that setting this option to true will automatically set the `flags` option to `"se"` if not set explicitly otherwise**. Defaults to `false`.
+   - `argv?: any[]` - An array of arguments to be passed to the script. This array will be available in the JXA script itself as a global variable `argv`. Please note that all values will be serialized to strings.
 
 ##### Returns
 

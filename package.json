@@ -1,6 +1,6 @@
 {
   "name": "osascript-tag",
-  "description": "A JavaScript template literal tag that executes AppleScript and other OSA languages",
+  "description": "A JavaScript template literal tag that executes OSA scripts (AppleScript, JavaScript, etc.)",
   "version": "0.1.0",
   "author": "Waseem Dahman <dwaseem@icloud.com>",
   "license": "MIT",
