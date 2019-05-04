@@ -23,24 +23,45 @@
     "osx"
   ],
   "scripts": {
-    "test": "echo \"no test specified\"",
+    "test": "jest",
+    "test:all": "yarn typecheck && yarn lint && yarn test:coverage",
+    "test:coverage": "jest --coverage",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "tslint --project .",
     "typecheck": "tsc --noEmit",
-    "test:all": "yarn typecheck && yarn lint && yarn test",
-    "build": "tsc",
+    "build": "tsc --build tsconfig.build.json",
     "prebuild": "rm -rf dist",
     "prepack": "yarn test:all && yarn build"
   },
   "files": [
     "dist"
   ],
+  "jest": {
+    "watchPathIgnorePatterns": [
+      "dist"
+    ],
+    "transform": {
+      "^.+\\.ts?$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "lib/**/*.ts"
+    ],
+    "roots": [
+      "<rootDir>/lib/",
+      "<rootDir>/tests/"
+    ]
+  },
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all",
     "printWidth": 120
   },
   "devDependencies": {
+    "@types/jest": "^24.0.12",
     "@types/node": "^11.13.8",
+    "coveralls": "^3.0.3",
+    "jest": "^24.7.1",
+    "ts-jest": "^24.0.2",
     "tslint": "^5.16.0",
     "typescript": "^3.4.5"
   }

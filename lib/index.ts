@@ -56,9 +56,13 @@ function buildString(strings: ReadonlyArray<string>, replacements: ReadonlyArray
   return result.trim();
 }
 
-function runScript<T>(strings: TemplateStringsArray, replacements: any[], options: Options & JXAOptions): Promise<T> {
+function runScript<T>(
+  strings: TemplateStringsArray,
+  replacements: any[],
+  options: Options & JXAOptions = {},
+): Promise<T> {
   if (process.platform !== 'darwin') {
-    return Promise.reject(new Error('osascript-tag requires MacOS'));
+    return Promise.reject(new Error('osascript-tag requires macOS'));
   }
   return new Promise((resolve, reject) => {
     const argv: any[] = options.argv || [];
@@ -68,11 +72,7 @@ function runScript<T>(strings: TemplateStringsArray, replacements: any[], option
 
     if (options.language === 'JavaScript') {
       language = options.language;
-      script = `
-        (function(...argv){
-          ${script}
-        })(${argv.map(value => JSON.stringify(value))})
-      `;
+      script = `(function(...argv){${script}})(${argv.map(value => JSON.stringify(value))})`;
     }
 
     if (options.parse) {
@@ -127,7 +127,7 @@ function osascript<T>(
     return runScript<T>(scriptOrOptions, replacementsArray, {});
   }
   return (script: TemplateStringsArray, ...replacements: any[]) => {
-    return runScript<T>(script, replacements, scriptOrOptions || {});
+    return runScript<T>(script, replacements, scriptOrOptions);
   };
 }
 

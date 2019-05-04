@@ -5,10 +5,7 @@
     "lib": ["es6"],
     "strict": true,
     "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "declaration": true,
-    "outDir": "dist"
+    "esModuleInterop": true
   },
-  "include": ["lib"],
   "exclude": ["node_modules", "dist"]
 }
