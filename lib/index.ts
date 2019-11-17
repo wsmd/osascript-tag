@@ -131,9 +131,9 @@ function osascript<T>(
   };
 }
 
-export function jxa<T extends any = any>(script: TemplateStringsArray, ...replacements: any[]): Promise<T>;
-export function jxa<T extends any = any>(options: JXAOptions): TemplateStringFn<T>;
-export function jxa<T>(
+function execJXA<T extends any = any>(script: TemplateStringsArray, ...replacements: any[]): Promise<T>;
+function execJXA<T extends any = any>(options: JXAOptions): TemplateStringFn<T>;
+function execJXA<T>(
   scriptOrOptions: TemplateStringsArray | JXAOptions,
   ...replacementsArray: any[]
 ): TemplateStringFn<T> | Promise<T> {
@@ -151,6 +151,7 @@ export function jxa<T>(
   };
 }
 
-osascript.jxa = jxa;
+osascript.jxa = execJXA;
 
+export const jxa = execJXA;
 export default osascript;
